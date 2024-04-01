@@ -1,7 +1,7 @@
-require "shrine"
-require "shrine/storage/s3"
-require "shrine/storage/file_system"
-require "image_processing/mini_magick"
+require 'shrine'
+require 'shrine/storage/s3'
+require 'shrine/storage/file_system'
+require 'image_processing/mini_magick'
 
 s3_options = {
   bucket:            ENV.fetch('S3_BUCKET_NAME'),
@@ -11,8 +11,8 @@ s3_options = {
 }
 
 Shrine.storages = {
-  cache: Shrine::Storage::S3.new(prefix: "cache", **s3_options),
-  store: Shrine::Storage::S3.new(prefix: "store", **s3_options),
+  cache: Shrine::Storage::S3.new(prefix: 'cache', **s3_options),
+  store: Shrine::Storage::S3.new(prefix: 'store', **s3_options),
 }
 
 Shrine.plugin :activerecord
@@ -22,7 +22,7 @@ Shrine.plugin :derivatives
 Shrine.plugin :presign_endpoint, presign_options: -> (request) {
   # 署名付きURLの有効期限や権限など、必要に応じてオプションを設定
   {
-    content_length_range: 0..10*1024*1024, # 最大10MB
-    content_disposition: "attachment", # ダウンロード時の挙動を指定
+    content_length_range: 0..10 * 1024 * 1024,
+    content_disposition: 'attachment',
   }
 }
