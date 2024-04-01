@@ -1,4 +1,7 @@
 # README
+## デモ
+![CleanShot 0006-04-01 at 16 18 43](https://github.com/MorrisFreeman/direct-upload-demo/assets/26075006/32ce4aec-c43b-4e7a-b769-963113735abe)
+
 ## 署名付きURLによるダイレクトアップロードのシーケンス図
 ```mermaid
 sequenceDiagram
