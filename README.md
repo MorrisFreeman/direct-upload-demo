@@ -19,6 +19,7 @@ sequenceDiagram
     Server->>S3: S3上の cache から store にファイルを昇格させる
     Server->>DB: メタデータをDBに保存
 ```
+- ファイルの検証や操作を行わないなら最初からstoreにあげてもいいかも
 
 ## 実装（バックエンド）
 ### Shrineの署名付きURLの機能を有効にする
