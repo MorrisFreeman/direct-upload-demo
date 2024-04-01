@@ -34,7 +34,7 @@ module Api
           # article.article_attacher.create_derivatives # ファイルの圧縮などの処理を行う
           article.article_attacher.promote
           article.save
-          render json: { message: "Success" }, status: :ok
+          render json: { message: "Success" }, status: :no_content
         else
           render json: { error: article.errors.full_messages.join(", ") }, status: :unprocessable_entity
         end

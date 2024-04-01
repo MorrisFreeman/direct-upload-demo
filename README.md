@@ -12,12 +12,14 @@ sequenceDiagram
     participant S3 as S3
 
 
-    Client->>+Server: 署名付きURLをリクエスト
-    Server->>-Client: 署名付きURLを発行
-    Client->>S3: 署名付きURLを使用してファイルを cache にアップロード
-    Client->>Server: アップロードしたファイルのメタデータを送信
+    Client->>+Server: 署名付きURLをリクエスト(GET)
+    Server-->>-Client: 署名付きURLを発行(200:OK)
+    Client->>+S3: 署名付きURLを使用してファイルを cache にアップロード(POST)
+    S3-->>-Client: 204:No Content
+    Client->>+Server: アップロードしたファイルのメタデータを送信
     Server->>S3: S3上の cache から store にファイルを昇格させる
     Server->>DB: メタデータをDBに保存
+    Server-->-Client: 204:No Content
 ```
 - ファイルの検証や操作を行わないなら最初からstoreにあげてもいいかも
 
