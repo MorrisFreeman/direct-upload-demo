@@ -5,18 +5,19 @@
 ## 署名付きURLによるダイレクトアップロードのシーケンス図
 ```mermaid
 sequenceDiagram
+    autonumber
     participant Client as クライアント
     participant Server as サーバー
     participant DB as DB
     participant S3 as S3
 
 
-    Client->>+Server: 1. 署名付きURLをリクエスト
-    Server->>-Client: 2. 署名付きURLを発行
-    Client->>S3: 3. 署名付きURLを使用してファイルを cache にアップロード
-    Client->>Server: 4. アップロードしたファイルのメタデータを送信
-    Server->>S3: 5. S3上の cache から store にファイルを昇格させる
-    Server->>DB: 6. メタデータをDBに保存
+    Client->>+Server: 署名付きURLをリクエスト
+    Server->>-Client: 署名付きURLを発行
+    Client->>S3: 署名付きURLを使用してファイルを cache にアップロード
+    Client->>Server: アップロードしたファイルのメタデータを送信
+    Server->>S3: S3上の cache から store にファイルを昇格させる
+    Server->>DB: メタデータをDBに保存
 ```
 
 ## 実装（バックエンド）
