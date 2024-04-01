@@ -6,7 +6,7 @@ const FileUpload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const fetchFiles = async () => {
     try {
-      const response = await axios.get('http://192.168.1.245:3001/api/v1/articles');
+      const response = await axios.get('http://localhost:3001/api/v1/articles');
       setFiles(response.data);
     } catch (error) {
       console.error('Error fetching files', error);
@@ -34,7 +34,7 @@ const FileUpload: React.FC = () => {
     formData.append('article[article]', file);
 
     try {
-      const response = await axios.post('http://192.168.1.245:3001/api/v1/articles', formData, {
+      const response = await axios.post('http://localhost:3001/api/v1/articles', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -60,11 +60,13 @@ const FileUpload: React.FC = () => {
     }
 
     // 署名付きURLを取得
-    const presignResponse = await axios.get('http://192.168.1.245:3001/s3/params', {
+    const presignResponse = await axios.get('http://localhost:3001/s3/params', {
       params: {filename: file.name, contentType: file.type},
     });
 
     const {url, fields} = presignResponse.data;
+
+    console.log('Presign response:', JSON.stringify(presignResponse.data));
     
     // FormDataを作成し、S3の署名付きURLに直接アップロード
     const formData = new FormData();
@@ -80,7 +82,7 @@ const FileUpload: React.FC = () => {
 
     const id_without_prefix = fields.key.replace(/^cache\//, '')
     console.log(id_without_prefix);
-    await axios.post('http://192.168.1.245:3001/api/v1/articles/create_with_direct_upload', {
+    await axios.post('http://localhost:3001/api/v1/articles/create_with_direct_upload', {
       article: {
         // アップロードしたファイルのキーなど、ファイルに関する情報をJSON文字列として含める
         article_data: JSON.stringify({

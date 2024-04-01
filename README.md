@@ -1,33 +1,31 @@
 # README
-## 認証付きURLによるダイレクトアップロードのシーケンス図
+## 署名付きURLによるダイレクトアップロードのシーケンス図
 ```mermaid
 sequenceDiagram
     participant Client as クライアント
     participant Server as サーバー
     participant S3 as S3
 
-    Client->>Server: 1. 認証付きURLをリクエスト
-    Server->>Client: 2. 認証付きURLを発行
-    Client->>S3: 3. 認証付きURLを使用してファイルをアップロード
+    Client->>Server: 1. 署名付きURLをリクエスト
+    Server->>Client: 2. 署名付きURLを発行
+    Client->>S3: 3. 署名付きURLを使用してファイルを cache アップロード
     Client->>Server: 4. アップロードしたファイルのメタデータを送信
-    Server->>S3: 5. cache から store に昇格させる
+    Server->>S3: 5. S3上の cache から store にファイルを昇格させる
 ```
 
-## 実装
-### Shrineの認証付きURLの機能を有効にする
+## 実装（バックエンド）
+### Shrineの署名付きURLの機能を有効にする
 ```rb
 # shrine.rb
 Shrine.plugin :presign_endpoint, presign_options: -> (request) {
-  # 署名付きURLの有効期限や権限など、必要に応じてオプションを設定
   {
-    content_length_range: 0..10 * 1024 * 1024,
-    content_disposition: 'attachment',
+    # 必要に応じて署名付きURLの有効期限や権限など、必要に応じてオプションを設定
   }
 }
 ```
 
 ### routesの設定
-`/s3/params` にアクセスすると認証付きURLを取得できる
+`/s3/params` にアクセスすると署名付きURLを取得できる
 ```rb
 # routes.rb
 mount Shrine.presign_endpoint(:cache) => "/s3/params"
@@ -35,6 +33,7 @@ mount Shrine.presign_endpoint(:cache) => "/s3/params"
 
 `presign_endpoint` を使用しない場合は以下のように独自のコントローラーを定義することもできる
 ```rb
+# presigns_controller.rb
 class PresignsController < ApplicationController
   def image
     set_rack_response ArticleUploader.presign_response(:cache, request.env)
@@ -50,4 +49,77 @@ class PresignsController < ApplicationController
 end
 ```
 
-### 
+### クライアントからアップロード済みファイルのメタデータを受け取る
+```rb
+# articles_controller.rb
+def create_with_direct_upload
+  article_data = params[:article][:article_data]
+  article = Article.new(article_data:)
+  if article.valid?
+    # 必要に応じてファイルの圧縮などの処理を行う
+    # この処理を行う場合はファイルはメモリ上に展開されるので、メモリ逼迫に注意
+    article.article_attacher.create_derivatives
+
+    # cache から store へ昇格
+    article.article_attacher.promote
+    article.save
+    render json: { message: "Success" }, status: :ok
+  else
+    render json: { error: article.errors.full_messages.join(", ") }, status: :unprocessable_entity
+  end
+end
+```
+
+## 実装（フロントエンド）
+### 署名付きURLを取得
+```ts
+// FileUpload.tsx
+const presignResponse = await axios.get('http://localhost:3001/s3/params', {
+  params: {filename: file.name, contentType: file.type},
+});
+```
+
+```json
+// presignResponse
+{
+  "fields": {
+    "key": "cache/xxxxxxxxxxxxxxxxxxxxxxx.png",
+    "Content-Disposition": "attachment",
+    "policy": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "x-amz-credential": "XXXXXXXXXXXXXXXXXXXX/20240401/ap-northeast-1/s3/aws4_request",
+    "x-amz-algorithm": "XXXX-XXXX-SHA256",
+    "x-amz-date": "20240401T070347Z",
+    "x-amz-signature": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "headers": {},
+  "method": "post",
+  "url": "https://xxxxxxxxxxxxxxxxxxxxx.s3.ap-northeast-1.amazonaws.com"
+}
+```
+
+### 署名付きURLを使ってファイルをアップロード
+```ts
+// FileUpload.tsx
+const uploadResponse = await axios.post(url, formData, {
+  headers: {'Content-Type': 'multipart/form-data'},
+});
+```
+
+### アップロードが完了したらメタデータをサーバーに送信
+```ts
+// FileUpload.tsx
+await axios.post('http://localhost:3001/api/v1/articles/create_with_direct_upload', {
+  article: {
+    // アップロードしたファイルのキーなど、ファイルに関する情報をJSON文字列として含める
+    article_data: JSON.stringify({
+      id: id_without_prefix, // S3の署名付きURLで取得したキー
+      storage: 'cache', // ファイルが保存されているストレージのタイプ
+      metadata: { // ファイルに関するメタデータ
+        filename: file.name,
+        size: file.size,
+        mime_type: file.type
+      }
+    })
+  }
+});
+```

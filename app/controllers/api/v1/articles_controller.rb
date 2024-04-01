@@ -31,7 +31,7 @@ module Api
         article_data = params[:article][:article_data]
         article = Article.new(article_data:)
         if article.valid?
-          article.article_attacher.create_derivatives
+          # article.article_attacher.create_derivatives # ファイルの圧縮などの処理を行う
           article.article_attacher.promote
           article.save
           render json: { message: "Success" }, status: :ok
