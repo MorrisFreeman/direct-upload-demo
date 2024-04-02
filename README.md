@@ -21,7 +21,6 @@ sequenceDiagram
     Server->>DB: メタデータをDBに保存
     Server-->>-Client: 204:No Content
 ```
-- ファイルの検証や操作を行わないなら最初からstoreにあげてもいいかも
 
 ## 実装（バックエンド）
 ### Shrineの署名付きURLの機能を有効にする
@@ -133,3 +132,8 @@ await axios.post('http://localhost:3001/api/v1/articles/create_with_direct_uploa
   }
 });
 ```
+
+### その他
+- S3 には CORS の設定をする必要がある
+  - テナントごとに設定する必要があり大変かも
+- ファイルの検証や操作を行わないなら最初からstoreにあげてもいいかも
