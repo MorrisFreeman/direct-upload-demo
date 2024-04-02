@@ -29,8 +29,23 @@ sequenceDiagram
 Shrine.plugin :presign_endpoint, presign_options: -> (request) {
   {
     # 必要に応じて署名付きURLの有効期限や権限などのオプションを設定
+    # content_length_range: 0..10 * 1024,
   }
 }
+```
+
+例えば上記でサイズ制限を行った場合、制限に反するファイルをS3へアップロードしようとすると以下のようなレスポンスが返ってくる
+
+`400: BadRequest`
+```xml
+<Error>
+  <Code>EntityTooLarge</Code>
+  <Message>Your proposed upload exceeds the maximum allowed size</Message>
+  <ProposedSize>10633</ProposedSize>
+  <MaxSizeAllowed>10240</MaxSizeAllowed>
+  <RequestId>QPNC1MDQ2NXVTG14</RequestId>
+  <HostId>m4i5WIFgE4SW/G34BxN2BFl5uBMjUU+BwHWzx7LryEthhYrJ6OT2lMnQGbHqN7NaRlgjw6vB1P0=</HostId>
+</Error>
 ```
 
 ### routesの設定
