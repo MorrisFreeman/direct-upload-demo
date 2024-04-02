@@ -43,8 +43,8 @@ Shrine.plugin :presign_endpoint, presign_options: -> (request) {
   <Message>Your proposed upload exceeds the maximum allowed size</Message>
   <ProposedSize>10633</ProposedSize>
   <MaxSizeAllowed>10240</MaxSizeAllowed>
-  <RequestId>QPNC1MDQ2NXVTG14</RequestId>
-  <HostId>m4i5WIFgE4SW/G34BxN2BFl5uBMjUU+BwHWzx7LryEthhYrJ6OT2lMnQGbHqN7NaRlgjw6vB1P0=</HostId>
+  <RequestId>XXXXXXXXXXXXXXXXXXXXXX</RequestId>
+  <HostId>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=</HostId>
 </Error>
 ```
 
