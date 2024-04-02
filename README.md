@@ -16,7 +16,7 @@ sequenceDiagram
     Server-->>-Client: 署名付きURLを発行(200:OK)
     Client->>+S3: 署名付きURLを使用してファイルを cache にアップロード(POST)
     S3-->>-Client: 204:No Content
-    Client->>+Server: アップロードしたファイルのメタデータを送信
+    Client->>+Server: アップロードしたファイルのメタデータを送信(POST)
     Server->>S3: S3上の cache から store にファイルを昇格させる
     Server->>DB: メタデータをDBに保存
     Server-->-Client: 204:No Content
