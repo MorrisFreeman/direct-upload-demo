@@ -28,7 +28,7 @@ sequenceDiagram
 # shrine.rb
 Shrine.plugin :presign_endpoint, presign_options: -> (request) {
   {
-    # 必要に応じて署名付きURLの有効期限や権限など、必要に応じてオプションを設定
+    # 必要に応じて署名付きURLの有効期限や権限などのオプションを設定
   }
 }
 ```
